@@ -30,7 +30,7 @@ async function postViaProxy(body: any, timeoutMs = 60_000): Promise<any> {
   const t = setTimeout(() => controller.abort(), timeoutMs);
 
   try {
-    const r = await fetch(`https://api.yanush-sim.ru/api/proxy?url=${encodeURIComponent(MODEL_ACTION)}`, {
+    const r = await fetch(`/proxy.php?url=${encodeURIComponent(MODEL_ACTION)}`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(body),
