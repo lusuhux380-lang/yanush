@@ -1,21 +1,42 @@
 import React, { useState } from 'react';
 import { TeacherProfile, StudentProfile } from '../types';
-import { ChevronRight, User, Settings, LogOut, ArrowLeft, CheckCircle2, Activity, Target, CreditCard, Sparkles, X, Loader2 } from 'lucide-react';
+import { ChevronRight, User, Settings, LogOut, ArrowLeft, CheckCircle2, Activity, Target, CreditCard, Sparkles, X, Loader2, ShieldAlert, Users, BookOpen, Heart, Smartphone, Home, Brain, Shuffle } from 'lucide-react';
 import { generateStudentName } from '../services/chaosEngine';
+import { ScenarioCategory } from '../services/chaosEngine';
 import { authService } from '../services/authService';
 import { COMMERCIAL_CONFIG } from '../constants';
 
 interface Props {
-  onStart: (teacher: TeacherProfile, student: StudentProfile) => void;
+  onStart: (teacher: TeacherProfile, student: StudentProfile, category?: ScenarioCategory) => void;
   onOpenAdmin: () => void;
   onBack: () => void;
 }
+
+const SCENARIO_CATEGORIES: Array<{
+  id: ScenarioCategory | 'random';
+  label: string;
+  sublabel: string;
+  Icon: React.FC<{ size?: number; className?: string }>;
+  color: string;
+  bg: string;
+  border: string;
+}> = [
+  { id: 'random',        label: 'Случайный',       sublabel: 'Сюрприз',          Icon: Shuffle,     color: 'text-slate-300',   bg: 'bg-slate-500/10',   border: 'border-slate-500/30' },
+  { id: 'aggressive',    label: 'Агрессия',         sublabel: 'Грубость, драки',  Icon: ShieldAlert, color: 'text-rose-400',    bg: 'bg-rose-500/10',    border: 'border-rose-500/30' },
+  { id: 'bullying',      label: 'Буллинг',          sublabel: 'Травля, кибер',    Icon: Users,       color: 'text-orange-400',  bg: 'bg-orange-500/10',  border: 'border-orange-500/30' },
+  { id: 'truancy',       label: 'Прогулы',          sublabel: 'Отказ от учёбы',   Icon: BookOpen,    color: 'text-yellow-400',  bg: 'bg-yellow-500/10',  border: 'border-yellow-500/30' },
+  { id: 'suicide_risk',  label: 'Суицид-риск',      sublabel: 'Селфхарм, маркеры',Icon: Heart,       color: 'text-pink-400',    bg: 'bg-pink-500/10',    border: 'border-pink-500/30' },
+  { id: 'addiction',     label: 'Зависимости',      sublabel: 'Гаджеты, ПАВ',    Icon: Smartphone,  color: 'text-purple-400',  bg: 'bg-purple-500/10',  border: 'border-purple-500/30' },
+  { id: 'family',        label: 'Семья',            sublabel: 'Конфликты, кризис',Icon: Home,        color: 'text-blue-400',    bg: 'bg-blue-500/10',    border: 'border-blue-500/30' },
+  { id: 'social_anxiety',label: 'Тревожность',      sublabel: 'Замкнутость, страх',Icon: Brain,      color: 'text-emerald-400', bg: 'bg-emerald-500/10', border: 'border-emerald-500/30' },
+];
 
 const SetupScreen: React.FC<Props> = ({ onStart, onOpenAdmin, onBack }) => {
   const [teacherName, setTeacherName] = useState('Алексей Петрович');
   const [teacherGender, setTeacherGender] = useState<'male' | 'female'>('male');
   const [studentAge, setStudentAge] = useState(14);
   const [studentGender, setStudentGender] = useState<'male' | 'female'>('male');
+  const [selectedCategory, setSelectedCategory] = useState<ScenarioCategory | 'random'>('random');
   const [showPayment, setShowPayment] = useState(false);
   const [isProcessingPayment, setIsProcessingPayment] = useState(false);
 
@@ -26,7 +47,8 @@ const SetupScreen: React.FC<Props> = ({ onStart, onOpenAdmin, onBack }) => {
     const randomName = generateStudentName(studentGender);
     onStart(
       { name: teacherName, gender: teacherGender },
-      { name: randomName, age: studentAge, gender: studentGender }
+      { name: randomName, age: studentAge, gender: studentGender },
+      selectedCategory === 'random' ? undefined : selectedCategory
     );
   };
 
@@ -162,6 +184,33 @@ const SetupScreen: React.FC<Props> = ({ onStart, onOpenAdmin, onBack }) => {
                             className="w-full h-1.5 bg-slate-900 rounded-full appearance-none accent-purple-500"
                         />
                     </div>
+                </div>
+            </div>
+        </div>
+
+        <div className="space-y-4">
+            <div className="flex items-center gap-3 text-amber-500 text-[10px] font-black uppercase tracking-[0.3em] ml-2">
+                <Activity size={14} /> Тема Сеанса
+            </div>
+            <div className="glass p-6 rounded-[40px] border-white/5">
+                <div className="grid grid-cols-2 gap-3">
+                    {SCENARIO_CATEGORIES.map(({ id, label, sublabel, Icon, color, bg, border }) => (
+                        <button
+                            key={id}
+                            onClick={() => setSelectedCategory(id as ScenarioCategory | 'random')}
+                            className={`flex items-center gap-3 p-4 rounded-[22px] text-left transition-all border ${
+                                selectedCategory === id
+                                    ? `${bg} ${border} ${color}`
+                                    : 'bg-white/5 border-white/5 text-slate-500 hover:border-white/15'
+                            }`}
+                        >
+                            <Icon size={18} className={selectedCategory === id ? color : 'text-slate-600'} />
+                            <div>
+                                <div className={`text-[10px] font-black uppercase leading-none ${selectedCategory === id ? color : 'text-slate-400'}`}>{label}</div>
+                                <div className="text-[8px] text-slate-600 mt-0.5">{sublabel}</div>
+                            </div>
+                        </button>
+                    ))}
                 </div>
             </div>
         </div>

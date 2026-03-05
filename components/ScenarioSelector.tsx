@@ -1,7 +1,17 @@
 
 import React, { useEffect, useState } from 'react';
-import { Play, RotateCcw, Network, Activity } from 'lucide-react';
+import { Play, RotateCcw, Network, Activity, ShieldAlert, Users, BookOpen, Heart, Smartphone, Home, Brain } from 'lucide-react';
 import { getSessionBackup } from '../services/storageService';
+
+const TOPIC_PILLS = [
+  { label: 'Агрессия',      Icon: ShieldAlert, color: 'text-rose-400' },
+  { label: 'Буллинг',       Icon: Users,       color: 'text-orange-400' },
+  { label: 'Прогулы',       Icon: BookOpen,    color: 'text-yellow-400' },
+  { label: 'Суицид-риск',   Icon: Heart,       color: 'text-pink-400' },
+  { label: 'Зависимости',   Icon: Smartphone,  color: 'text-purple-400' },
+  { label: 'Семья',         Icon: Home,        color: 'text-blue-400' },
+  { label: 'Тревожность',   Icon: Brain,       color: 'text-emerald-400' },
+];
 
 interface Props {
   onStart: () => void;
@@ -52,6 +62,13 @@ const ScenarioSelector: React.FC<Props> = ({ onStart, onResume }) => {
           <p className="text-[10px] text-slate-500 uppercase tracking-widest font-bold">
             Выставка акцентуаций им. А. Личко
           </p>
+          <div className="flex flex-wrap justify-center gap-2 pt-2">
+            {TOPIC_PILLS.map(({ label, Icon, color }) => (
+              <div key={label} className={`flex items-center gap-1.5 px-3 py-1.5 bg-white/5 border border-white/8 rounded-full text-[9px] font-black uppercase tracking-widest ${color}`}>
+                <Icon size={10} /> {label}
+              </div>
+            ))}
+          </div>
         </div>
 
         <div className="flex flex-col w-full sm:w-auto gap-4 pt-8">

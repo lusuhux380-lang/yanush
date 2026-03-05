@@ -81,7 +81,35 @@ export const generateStudentName = (gender: 'male' | 'female'): string => {
     return list[Math.floor(Math.random() * list.length)];
 };
 
-export const buildDynamicPrompt = (teacher: TeacherProfile, student: StudentProfile, isPremium: boolean = false): ActiveSession => {
+export type ScenarioCategory = 'aggressive' | 'bullying' | 'truancy' | 'suicide_risk' | 'addiction' | 'family' | 'social_anxiety';
+
+const CATEGORY_INCIDENT_IDS: Record<ScenarioCategory, string[]> = {
+  aggressive:    ['inc_fight', 'inc_rude', 'inc_dominance', 'inc_vandal'],
+  bullying:      ['inc_cyberbullying', 'inc_setup'],
+  truancy:       ['inc_truancy', 'inc_sleep'],
+  suicide_risk:  ['inc_panic', 'inc_sleep'],
+  addiction:     ['inc_vape', 'inc_phone', 'inc_earbuds'],
+  family:        ['inc_fight', 'inc_grades_begging', 'inc_cheating'],
+  social_anxiety:['inc_panic', 'inc_earbuds', 'inc_theft'],
+};
+
+const CATEGORY_BACKGROUND_IDS: Record<ScenarioCategory, string[]> = {
+  aggressive:    ['bg_bad_company', 'bg_divorce', 'bg_gifted'],
+  bullying:      ['bg_poor', 'bg_bad_company', 'bg_orphan'],
+  truancy:       ['bg_gamer', 'bg_bad_company', 'bg_divorce'],
+  suicide_risk:  ['bg_selfharm', 'bg_abuse', 'bg_loss'],
+  addiction:     ['bg_gamer', 'bg_blogger'],
+  family:        ['bg_abuse', 'bg_divorce', 'bg_orphan'],
+  social_anxiety:['bg_orphan', 'bg_loss', 'bg_poor'],
+};
+
+function pickFromCategory<T extends { id: string }>(all: T[], ids: string[]): T | undefined {
+  const filtered = all.filter(m => ids.includes(m.id));
+  if (filtered.length === 0) return undefined;
+  return filtered[Math.floor(Math.random() * filtered.length)];
+}
+
+export const buildDynamicPrompt = (teacher: TeacherProfile, student: StudentProfile, isPremium: boolean = false, category?: ScenarioCategory): ActiveSession => {
   const availableAccs = isPremium ? DEFAULT_ACCENTUATIONS : DEFAULT_ACCENTUATIONS.filter(a => ACCESS_LIMITS.FREE_ACCENTUATIONS.includes(a.id));
   const randomAcc = availableAccs[Math.floor(Math.random() * availableAccs.length)];
   const intensity = Math.floor(Math.random() * 3) + 3; 
@@ -91,8 +119,10 @@ export const buildDynamicPrompt = (teacher: TeacherProfile, student: StudentProf
   const allIncidents = DEFAULT_CONTEXT_MODULES.filter(m => m.category === 'incident');
   const allBackgrounds = DEFAULT_CONTEXT_MODULES.filter(m => m.category === 'background');
 
-  const incident = [...allIncidents].sort(() => Math.random() - 0.5)[0];
-  const background = [...allBackgrounds].sort(() => Math.random() - 0.5)[0];
+  const incident = (category && pickFromCategory(allIncidents, CATEGORY_INCIDENT_IDS[category]))
+    ?? [...allIncidents].sort(() => Math.random() - 0.5)[0];
+  const background = (category && pickFromCategory(allBackgrounds, CATEGORY_BACKGROUND_IDS[category]))
+    ?? [...allBackgrounds].sort(() => Math.random() - 0.5)[0];
 
   const chaosPrompt = `
     [ЯЗЫКОВОЙ ПРОТОКОЛ: СТРОГО КИРИЛЛИЦА, РУССКИЙ ЯЗЫК]

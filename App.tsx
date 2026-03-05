@@ -9,7 +9,7 @@ import MuseumView from './components/MuseumView';
 import SecurityShield from './components/SecurityShield';
 import { ErrorBoundary } from './components/ErrorBoundary';
 import { ActiveSession, TeacherProfile, StudentProfile, Message, SessionLog, UserAccount } from './types';
-import { buildDynamicPrompt } from './services/chaosEngine';
+import { buildDynamicPrompt, ScenarioCategory } from './services/chaosEngine';
 import { getSessionBackup } from './services/storageService';
 import { authService } from './services/authService';
 
@@ -33,9 +33,9 @@ const App: React.FC = () => {
       setView('landing');
   };
 
-  const startSession = (teacher: TeacherProfile, student: StudentProfile) => {
+  const startSession = (teacher: TeacherProfile, student: StudentProfile, category?: ScenarioCategory) => {
     const isPremium = user?.role === 'ADMIN' || user?.role === 'PREMIUM';
-    const sessionData = buildDynamicPrompt(teacher, student, isPremium);
+    const sessionData = buildDynamicPrompt(teacher, student, isPremium, category);
     setActiveSession(sessionData);
     setRestoredMessages([]); 
     setView('chat');
